@@ -11,6 +11,8 @@ import {
   ToastAndroid
 } from "react-native";
 import NfcManager, { NfcTech, Ndef } from "react-native-nfc-manager";
+import LottieView from "lottie-react-native";
+import { router } from "expo-router";
 
 // Initialize NFC Manager
 // NfcManager.start();
@@ -21,8 +23,6 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 
 // components
 import NFCCategory from "@/components/NFCCategory";
-import LottieView from "lottie-react-native";
-import { router } from "expo-router";
 
 const DeviceWH = Dimensions.get("window");
 
