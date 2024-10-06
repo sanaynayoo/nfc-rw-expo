@@ -72,7 +72,7 @@ const NFCWriter = () => {
   };
 
   const onNFCWriteHandler = () => {
-    if (isNFCSupport) {
+    if (!isNFCSupport) {
       router.push("/NFCWrite");
     } else {
       NFCNotSupportedToast();
@@ -80,21 +80,16 @@ const NFCWriter = () => {
   };
 
   const NFCNotSupportedToast = () => {
-    ToastAndroid.show("NFC doesn't support your device", ToastAndroid.SHORT);
+    ToastAndroid.show(
+      "Your device does not have NFC capabilities.",
+      ToastAndroid.SHORT
+    );
   };
 
   return (
     <View style={styles.container}>
       {/* ---- nfc info ---- */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "flex-end",
-          justifyContent: "space-between",
-          paddingHorizontal: 10,
-          marginTop: 10
-        }}
-      >
+      <View style={styles.nfcHeaderContainer}>
         <View style={styles.nfcContainer}>
           {isNFCSupport ? (
             <MaterialCommunityIcons
@@ -112,19 +107,7 @@ const NFCWriter = () => {
           <Text style={{ marginLeft: 10, color: "#fff", fontSize: 16 }}>
             NFC
           </Text>
-          <View
-            style={{
-              backgroundColor: isNFCSupport ? "#73DC45" : "#FF1D1D",
-              width: 20,
-              height: 20,
-              borderRadius: 50,
-              borderWidth: 2.5,
-              borderColor: "#fff",
-              position: "absolute",
-              top: -3,
-              right: -5
-            }}
-          />
+          <View style={[styles.nfcActiveContainer,{backgroundColor: isNFCSupport ? "#73DC45" : "#FF1D1D",}]} />
         </View>
 
         {/* ----- enable NFC ----- */}
@@ -146,12 +129,6 @@ const NFCWriter = () => {
       <NFCCategory onScan={onNFCScanHandler} onWrite={onNFCWriteHandler} />
 
       {/* --- nfc --- */}
-      {/* <LottieView
-        source={require("@/assets/icons/NFCScan.json")}
-        autoPlay
-        loop
-        style={{ width: "100%", height: 400 }}
-      /> */}
     </View>
   );
 };
@@ -162,6 +139,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff"
+  },
+  nfcActiveContainer: {
+    width: 20,
+    height: 20,
+    borderRadius: 50,
+    borderWidth: 2.5,
+    borderColor: "#fff",
+    position: "absolute",
+    top: -3,
+    right: -5
+  },
+  nfcHeaderContainer: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
+    marginTop: 10
   },
   nfcContainer: {
     width: DeviceWH.width / 4 + 20,
