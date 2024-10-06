@@ -72,7 +72,7 @@ const NFCWriter = () => {
   };
 
   const onNFCWriteHandler = () => {
-    if (!isNFCSupport) {
+    if (isNFCSupport) {
       router.push("/NFCWrite");
     } else {
       NFCNotSupportedToast();
@@ -107,7 +107,12 @@ const NFCWriter = () => {
           <Text style={{ marginLeft: 10, color: "#fff", fontSize: 16 }}>
             NFC
           </Text>
-          <View style={[styles.nfcActiveContainer,{backgroundColor: isNFCSupport ? "#73DC45" : "#FF1D1D",}]} />
+          <View
+            style={[
+              styles.nfcActiveContainer,
+              { backgroundColor: isNFCSupport ? "#73DC45" : "#FF1D1D" }
+            ]}
+          />
         </View>
 
         {/* ----- enable NFC ----- */}
