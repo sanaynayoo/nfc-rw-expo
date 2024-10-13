@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -14,21 +14,22 @@ import NfcManager, { NfcTech, Ndef } from "react-native-nfc-manager";
 import LottieView from "lottie-react-native";
 import { router } from "expo-router";
 
-// Initialize NFC Manager
-// NfcManager.start();
-
 // icon
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 // components
 import NFCCategory from "@/components/NFCCategory";
+import { Entypo } from "@expo/vector-icons";
+import AlertModal from "@/components/AlertModal";
 
+// Device WH
 const DeviceWH = Dimensions.get("window");
 
 const NFCWriter = () => {
   const [isNFCSupport, setIsNFCSupport] = useState<boolean>(false);
   const animationRef = useRef<LottieView>(null);
+  const [showAlert, setShowAlert] = useState(false);
 
   useEffect(() => {
     animationRef.current?.play();
@@ -53,11 +54,6 @@ const NFCWriter = () => {
     initialNFC();
   }, []);
 
-  // enable nfc
-  // const isEnabled = async () => {
-  //   return NfcManager.isEnabled();
-  // };
-
   // to enable nfc
   const goToNfcSetting = async () => {
     return NfcManager.goToNfcSetting();
@@ -67,23 +63,16 @@ const NFCWriter = () => {
     if (isNFCSupport) {
       router.push("/NFCScan");
     } else {
-      NFCNotSupportedToast();
+      setShowAlert(true);
     }
   };
 
   const onNFCWriteHandler = () => {
-    if (isNFCSupport) {
+    if (!isNFCSupport) {
       router.push("/NFCWrite");
     } else {
-      NFCNotSupportedToast();
+      setShowAlert(true);
     }
-  };
-
-  const NFCNotSupportedToast = () => {
-    ToastAndroid.show(
-      "Your device does not have NFC capabilities.",
-      ToastAndroid.SHORT
-    );
   };
 
   return (
@@ -133,7 +122,12 @@ const NFCWriter = () => {
       {/* ---- NFC Option --- */}
       <NFCCategory onScan={onNFCScanHandler} onWrite={onNFCWriteHandler} />
 
-      {/* --- nfc --- */}
+      {/* ------ alert ------ */}
+      <AlertModal
+        showModal={showAlert}
+        contentText={`Your device does not have NFC capabilities.`}
+        onChange={() => setShowAlert(false)}
+      />
     </View>
   );
 };
