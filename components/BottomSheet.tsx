@@ -62,7 +62,7 @@ const BottomSheets: React.FC<BottomSheetType> = ({
               color="#C288FE"
             />
           </View>
-          <Text style={styles.cardTtitle}>Select Card Type</Text>
+          <Text style={styles.cardTtitle}>Select Write Card Type</Text>
         </View>
         <View style={styles.listContainer}>
           {data.map((list, idx) => (

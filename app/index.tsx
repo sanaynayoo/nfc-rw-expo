@@ -20,8 +20,10 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 
 // components
 import NFCCategory from "@/components/NFCCategory";
-import { Entypo } from "@expo/vector-icons";
 import AlertModal from "@/components/AlertModal";
+
+// hook
+import { useToastAndroidIOS } from "@/hooks/useToastAndroidIOS";
 
 // Device WH
 const DeviceWH = Dimensions.get("window");
@@ -30,6 +32,8 @@ const NFCWriter = () => {
   const [isNFCSupport, setIsNFCSupport] = useState<boolean>(false);
   const animationRef = useRef<LottieView>(null);
   const [showAlert, setShowAlert] = useState(false);
+
+  const { ToastAndroidIOS } = useToastAndroidIOS();
 
   useEffect(() => {
     animationRef.current?.play();
@@ -63,7 +67,7 @@ const NFCWriter = () => {
     if (isNFCSupport) {
       router.push("/NFCScan");
     } else {
-      setShowAlert(true);
+      ToastAndroidIOS("Your device does not have NFC capabilities");
     }
   };
 

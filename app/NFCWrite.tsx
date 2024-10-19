@@ -7,7 +7,8 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  ToastAndroid
+  ToastAndroid,
+  Keyboard
 } from "react-native";
 import NfcManager, { NfcTech, Ndef } from "react-native-nfc-manager";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
@@ -24,7 +25,7 @@ const DeviceWH = Dimensions.get("window");
 // icons
 import Feather from "@expo/vector-icons/Feather";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { Entypo } from "@expo/vector-icons";
+import { Entypo, MaterialIcons } from "@expo/vector-icons";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import AlertModal from "@/components/AlertModal";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -63,59 +64,60 @@ let listTypeDemo: DemoType[] = [
 ];
 
 const NFCWrite = () => {
-  const [addData, setAddData] = useState("");
   const [writing, setWriting] = useState(false);
   const [readOnly, setReadOnly] = useState(false);
-  const [selectedType, setSelectedType] = useState("text");
   const [showAlert, setShowAlert] = useState(false);
+  const [selectTypeName, setSelectedTypeName] = useState<DemoType>({
+    title: "Text",
+    type: "text",
+    icon: <Entypo name="text" size={24} color="black" />
+  });
 
   const {
     control,
+    handleSubmit,
     formState: { errors }
   } = useForm({
     defaultValues: {
       name: "",
       phone: "",
       org: "",
-      email: ""
+      email: "",
+      text: "",
+      link: "",
+      ssid: "",
+      password: ""
     }
   });
-
-  // vCard
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [org, setOrg] = useState("");
-  const [email, setEmail] = useState("");
-
-  // wifi
-  const [ssid, setSSID] = useState("");
-  const [wifiPwd, setWifiPwd] = useState("");
 
   // ref
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
-  const onNFCWriteHandler = () => {
-    switch (selectedType) {
+  const onNFCWriteHandler = handleSubmit(async (data) => {
+    switch (selectTypeName.type) {
       case "text":
-        onNFCWrite(Ndef.textRecord(addData));
+        onNFCWrite(Ndef.textRecord(data.text));
         break;
       case "vcard":
         // const mimeType = new TextEncoder().encode("text/vcard");
         // const payload = new TextEncoder().encode(vCard);
         // onNFCWrite(Ndef.record(Ndef.TNF_MIME_MEDIA, mimeType, [], payload));
-        const vCard = `BEGIN:VCARD\nVERSION:2.1\nN:;${name}\nORG: ${org}\nTEL;HOME:${phone}\nEMAIL:${email}\nEND:VCARD`;
+        const vCard = `BEGIN:VCARD\nVERSION:2.1\nN:;${data.name}\nORG: ${data.org}\nTEL;HOME:${data.phone}\nEMAIL:${data.email}\nEND:VCARD`;
         onNFCWrite(Ndef.record(Ndef.TNF_MIME_MEDIA, "text/vcard", [], vCard));
         break;
       case "wifi":
-        onNFCWrite(Ndef.wifiSimpleRecord({ ssid: ssid, networkKey: wifiPwd }));
+        onNFCWrite(
+          Ndef.wifiSimpleRecord({ ssid: data.ssid, networkKey: data.password })
+        );
         break;
       default:
-        onNFCWrite(Ndef.uriRecord(addData));
+        onNFCWrite(Ndef.uriRecord(data.link));
         break;
     }
-  };
+  });
+
   const onNFCWrite = async (cardData: any) => {
-    if (addData) {
+    if (cardData) {
       setWriting(true);
       try {
         await NfcManager.requestTechnology(NfcTech.Ndef);
@@ -143,12 +145,13 @@ const NFCWrite = () => {
 
   // callbacks
   const onShowTypeHandler = useCallback(() => {
+    Keyboard.dismiss();
     bottomSheetModalRef.current?.present();
   }, []);
 
   // select card type
   const onSelectedHandler = (cardType: DemoType) => {
-    setSelectedType(cardType.type);
+    setSelectedTypeName(cardType);
     setTimeout(() => {
       bottomSheetModalRef.current?.close();
     }, 300);
@@ -167,63 +170,109 @@ const NFCWrite = () => {
             activeOpacity={0.6}
             onPress={onShowTypeHandler}
           >
-            <MaterialCommunityIcons
-              name="form-dropdown"
-              size={24}
-              color="#C288FE"
-            />
-            <Text style={{ paddingLeft: 5, color: "#C288FE", fontSize: 13 }}>
-              Select
-            </Text>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              {selectTypeName.icon}
+              <Text style={{ marginLeft: 10, fontSize: 14 }}>
+                {selectTypeName.title}
+              </Text>
+            </View>
+            <Feather name="chevron-down" size={24} color="#A86CE5" />
           </TouchableOpacity>
-          <TextInput
-            placeholder={`Enter your ${selectedType}`}
-            value={addData}
-            onChangeText={setAddData}
-            style={styles.input}
-            keyboardType="default"
-          />
         </View>
 
-        <View>
-          {/* --- Name Input ---- */}
-          <InputForm
-            control={control}
-            placeholder="Name"
-            type="name"
-            icon={<FontAwesome5 name="user" size={22} color="#A86CE5" />}
-          />
+        {selectTypeName.type === "vcard" ? (
+          <View>
+            {/* --- Name Input ---- */}
+            <InputForm
+              control={control}
+              placeholder="Name"
+              type="name"
+              icon={<FontAwesome5 name="user" size={20} color="#A86CE5" />}
+            />
 
-          {/* --- Name Input ---- */}
-          <InputForm
-            control={control}
-            placeholder="Phone Number"
-            type="phone"
-            icon={<Feather name="phone" size={24} color="#A86CE5" />}
-          />
+            {/* --- Phone Input ---- */}
+            <InputForm
+              control={control}
+              placeholder="Phone Number"
+              type="phone"
+              icon={<Feather name="phone" size={22} color="#A86CE5" />}
+            />
 
-          {/* --- Name Input ---- */}
-          <InputForm
-            control={control}
-            placeholder="Email"
-            type="email"
-            icon={
-              <MaterialCommunityIcons
-                name="email-edit-outline"
-                size={24}
-                color="#A86CE5"
-              />
-            }
-          />
+            {/* --- Email Input ---- */}
+            <InputForm
+              control={control}
+              placeholder="Email"
+              type="email"
+              icon={
+                <MaterialCommunityIcons
+                  name="email-edit-outline"
+                  size={24}
+                  color="#A86CE5"
+                />
+              }
+            />
 
-          {/* --- Name Input ---- */}
-          <InputForm
-            control={control}
-            placeholder="Organization"
-            type="org"
-            icon={<Octicons name="organization" size={24} color="#A86CE5" />}
-          />
-        </View>
+            {/* --- Org Input ---- */}
+            <InputForm
+              control={control}
+              placeholder="Organization"
+              type="org"
+              icon={<Octicons name="organization" size={20} color="#A86CE5" />}
+            />
+          </View>
+        ) : selectTypeName.type === "wifi" ? (
+          <View>
+            {/* --- SSID Input ---- */}
+            <InputForm
+              control={control}
+              placeholder="Wifi Name"
+              type="ssid"
+              icon={<Feather name="wifi" size={22} color="#A86CE5" />}
+            />
+
+            {/* --- Password Input ---- */}
+            <InputForm
+              control={control}
+              placeholder="Password"
+              type="password"
+              icon={
+                <MaterialIcons name="lock-outline" size={24} color="#A86CE5" />
+              }
+            />
+          </View>
+        ) : selectTypeName.type === "text" ? (
+          <View>
+            {/* --- Name Input ---- */}
+            <InputForm
+              control={control}
+              placeholder={`Enter your text`}
+              type="text"
+              icon={
+                selectTypeName.type == "text" ? (
+                  <Entypo name="text" size={24} color="#A86CE5" />
+                ) : (
+                  <Entypo name="link" size={24} color="#A86CE5" />
+                )
+              }
+            />
+          </View>
+        ) : (
+          <View>
+            {/* --- Link Input ---- */}
+            <InputForm
+              control={control}
+              placeholder={`Enter your link`}
+              type="link"
+              icon={
+                selectTypeName.type == "text" ? (
+                  <Entypo name="text" size={24} color="#A86CE5" />
+                ) : (
+                  <Entypo name="link" size={24} color="#A86CE5" />
+                )
+              }
+            />
+          </View>
+        )}
 
         {/* ----- Write with readonly ------- */}
 
@@ -265,14 +314,14 @@ const NFCWrite = () => {
       <BottomSheets
         data={listTypeDemo}
         bottomRef={bottomSheetModalRef}
-        selected={selectedType}
+        selected={selectTypeName.type}
         onSelect={onSelectedHandler}
       />
 
       {/* ------ alert ------ */}
       <AlertModal
         showModal={showAlert}
-        contentText={`Please add your ${selectedType} and continue`}
+        contentText={`Please add your ${selectTypeName.title} and continue`}
         onChange={() => setShowAlert(false)}
       />
     </View>
@@ -305,7 +354,12 @@ const styles = StyleSheet.create({
   },
   containerSelected: {
     flexDirection: "row",
-    alignItems: "center"
+    alignItems: "center",
+    width: "50%",
+    justifyContent: "space-between",
+    borderBottomWidth: 0.4,
+    borderColor: "#C288FE",
+    paddingVertical: 14
   },
   selectType: {
     marginLeft: 10
@@ -325,8 +379,7 @@ const styles = StyleSheet.create({
   },
   inputContainerSection: {
     alignItems: "center",
-    marginTop: 20,
-    justifyContent: "space-between"
+    marginTop: 20
   },
   nfcWritingText: {
     marginHorizontal: 10,
@@ -379,19 +432,9 @@ const styles = StyleSheet.create({
     borderColor: "#AD5CFF"
   },
   inputContainer: {
-    width: DeviceWH.width - 40,
-    backgroundColor: "#fff",
     flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#C288FE",
+    alignSelf: "flex-start",
     paddingHorizontal: 10,
-    paddingVertical: 10,
-    borderRadius: 5,
-    shadowOffset: { width: 0, height: 6 },
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 2
+    paddingVertical: 10
   }
 });

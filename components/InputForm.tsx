@@ -21,6 +21,7 @@ const InputForm: React.FC<InputFormProps> = ({
   return (
     <View style={styles.inputContainer}>
       <View style={styles.iconContainer}>{icon}</View>
+      <View style={styles.line} />
       <Controller
         control={control}
         rules={{
@@ -45,10 +46,20 @@ export default InputForm;
 
 const styles = StyleSheet.create({
   iconContainer: {
-    paddingRight: 10,
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
     marginRight: 10,
-    borderRightWidth: 1,
-    borderColor: "#C288FE"
+    backgroundColor: "#F4E9FF",
+    padding: 5,
+    borderRadius: 50
+  },
+  line: {
+    width: 0.5,
+    height: "100%",
+    marginRight: 10,
+    backgroundColor: "#AD5CFF"
   },
   input: {
     width: DeviceWH.width / 2 + 20,
@@ -65,14 +76,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#C288FE",
+    borderColor: "#fff",
     paddingHorizontal: 10,
     paddingVertical: 10,
     borderRadius: 5,
-    shadowOffset: { width: 0, height: 6 },
-    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 5 },
+    shadowColor: "#C288FE",
     shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 2
+    shadowRadius: 10,
+    elevation: 1.5
   }
 });

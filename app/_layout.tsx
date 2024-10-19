@@ -1,6 +1,8 @@
 import { Stack } from "expo-router";
 import BottomSheet, { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { RootSiblingParent } from "react-native-root-siblings";
+
 function InitialLayout() {
   return (
     <Stack>
@@ -36,10 +38,12 @@ function InitialLayout() {
 
 export default function RootLayout() {
   return (
-    <GestureHandlerRootView>
-      <BottomSheetModalProvider>
-        <InitialLayout />
-      </BottomSheetModalProvider>
-    </GestureHandlerRootView>
+    <RootSiblingParent>
+      <GestureHandlerRootView>
+        <BottomSheetModalProvider>
+          <InitialLayout />
+        </BottomSheetModalProvider>
+      </GestureHandlerRootView>
+    </RootSiblingParent>
   );
 }
